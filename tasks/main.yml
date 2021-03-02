@@ -1,0 +1,15 @@
+---
+# aws_main.yml
+#
+# Ansible playbook to create a standard secure AWS public/private
+# subnet environment in the specified VPC.
+#
+# semuadmin - github.com/semuconsulting - 02/2018
+#
+- name: Provision AWS public / private network architecture
+  include: network.yml
+  when: provision_network and not remove_network
+
+- name: Remove AWS public / private network architecture
+  include: network_remove.yml
+  when: remove_network and not provision_network

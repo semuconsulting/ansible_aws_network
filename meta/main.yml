@@ -1,0 +1,22 @@
+galaxy_info:
+  role_name: aws-network
+  author: semuadmin
+  description: AWS Public / Private Network role
+  company: SEMU Consulting
+
+  license: BSD
+
+  min_ansible_version: 2.4
+
+  platforms:
+  - aws
+  
+  galaxy_tags:
+  - aws
+  - network
+  
+  dependencies:
+  - python>=2.6
+  - boto
+  - boto3
+  - botocore

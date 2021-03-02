@@ -1,0 +1,56 @@
+---
+# defaults file for aws_network
+
+aws_profile: default
+
+provision_network: true
+remove_network: false
+create_s3_vpce: true
+
+vpc_id: "vpc-123456789"
+public_cidr: "172.45.10.0/26"
+public_name: "subnet_public"
+private_cidr: "172.45.20.0/26"
+private_name: "subnet_private"
+admin_cidr: "12.34.56.78/32"
+
+private_key_path: "~/.ssh/id_rsa"
+keypair_name: "id_rsa"
+region: "eu-west-2" # eu-west-2 is London
+availability_zone: "eu-west-2c"
+tag_project: "project"
+tag_cost_code: "cost_code"
+
+standard_ami: "ami-0eab3a90fc693af19" # Centos/7 AMI
+standard_instance_type: "t2.micro"
+standard_username: "centos"
+nat_ami: "ami-e6768381" # Amazon NAT AMI
+nat_instance_type: "t2.micro"
+nat_username: "ec2-user"
+bastion_ami: "ami-0eab3a90fc693af19"
+bastion_instance_type: "t2.micro"
+bastion_username: "centos"
+db_port: 5432
+create_bastion_eip: false
+
+setup_public_nacl: true
+public_nacl_in:
+  - [100, 'tcp', 'allow', '0.0.0.0/0', null, null, 80, 80]
+  - [110, 'tcp', 'allow', '0.0.0.0/0', null, null, 443, 443]
+  - [120, 'udp', 'allow', '0.0.0.0/0', null, null, 1194, 1194]
+  - [130, 'tcp', 'allow', "{{ admin_cidr }}", null, null, 22, 22]
+  - [140, 'tcp', 'allow', '0.0.0.0/0', null, null, 1024, 65535]
+public_nacl_out:
+  - [100, 'all', 'allow', '0.0.0.0/0', null, null, null, null]
+  - [110, 'tcp', 'allow', "{{ private_cidr }}", null, null, 22, 22]
+  - [120, 'tcp', 'allow', "{{ private_cidr }}", null, null, "{{ db_port }}", "{{ db_port }}"]
+
+setup_private_nacl: true
+private_nacl_in:
+  - [100, 'tcp', 'allow', "{{ public_cidr }}", null, null, "{{ db_port }}", "{{ db_port }}"]
+  - [110, 'tcp', 'allow', "{{ public_cidr }}", null, null, 22, 22]
+  - [120, 'tcp', 'allow', '0.0.0.0/0', null, null, 1024, 65535]
+private_nacl_out:
+  - [100, 'tcp', 'allow', '0.0.0.0/0', null, null, 80, 80]
+  - [110, 'tcp', 'allow', '0.0.0.0/0', null, null, 443, 443]
+  - [120, 'tcp', 'allow', "{{ public_cidr }}", null, null, 32768, 65535]

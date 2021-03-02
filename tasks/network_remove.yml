@@ -1,0 +1,111 @@
+---
+# aws_network_remove.yml
+#
+# Ansible playbook to remove a standard secure AWS public/private
+# subnet environment in the specified VPC.
+#
+# It is based on the AWS wiki for VPC "Scenario 2":
+# https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Scenario2.html
+#
+# semuadmin - github.com/semuconsulting - 02/2018
+#
+# - name: Remove Bastion ec2 instance
+#   local_action:
+#     module: ec2
+#     state: absent
+#     region: "{{ region }}"
+#     instance_tags:
+#        Name: "Bastion"
+#
+# - name: Remove NAT ec2 instance
+#   local_action:
+#     module: ec2
+#     state: absent
+#     region: "{{ region }}"
+#     instance_tags:
+#         Name: "NAT"
+
+# - name: Remove S3 VPC endpoint
+#   ec2_vpc_endpoint:
+#     state: absent
+#     region: "{{ region }}"
+#     vpc_id: "{{ vpc_id }}"
+#     service: "com.amazonaws.{{ region }}.s3"
+  
+- name: Remove private (NAT-protected) route table
+  ec2_vpc_route_table:
+    state: absent
+    vpc_id: "{{ vpc_id }}"
+    region: "{{ region }}"
+    lookup: tag
+    tags:
+      Name: "rt_private"
+
+- name: Remove public route table
+  ec2_vpc_route_table:
+    state: absent
+    vpc_id: "{{ vpc_id }}"
+    region: "{{ region }}"
+    lookup: tag
+    tags:
+      Name: "rt_public"
+
+- name: Remove private security group
+  ec2_group:
+    state: absent
+    name: "sg_private"
+    vpc_id: "{{ vpc_id }}"
+    region: "{{ region }}"
+    tags:
+      Name: "sg_private"
+
+- name: Remove public security group
+  ec2_group:
+    state: absent
+    name: "sg_public"
+    vpc_id: "{{ vpc_id }}"
+    region: "{{ region }}"
+    tags:
+      Name: "sg_public"
+
+- name: Remove nat security group
+  ec2_group:
+    state: absent
+    name: "sg_nat"
+    vpc_id: "{{ vpc_id }}"
+    region: "{{ region }}"
+    tags:
+      Name: "sg_nat"
+
+- name: Remove bastion security group
+  ec2_group:
+    state: absent
+    name: "sg_bastion"
+    vpc_id: "{{ vpc_id }}"
+    region: "{{ region }}"
+    tags:
+      Name: "sg_bastion"
+
+- name: Remove Private NACL
+  ec2_vpc_nacl:
+    state: absent
+    vpc_id: "{{ vpc_id }}"
+    name: "NACL_private"
+
+- name: Remove Public NACL
+  ec2_vpc_nacl:
+    state: absent
+    vpc_id: "{{ vpc_id }}"
+    name: "NACL_public"
+
+- name: Remove private subnet
+  ec2_vpc_subnet:
+    state: absent
+    vpc_id: "{{ vpc_id }}"
+    cidr: "{{ private_cidr }}"
+
+- name: Remove public subnet
+  ec2_vpc_subnet:
+    state: absent
+    vpc_id: "{{ vpc_id }}"
+    cidr: "{{ public_cidr }}"
